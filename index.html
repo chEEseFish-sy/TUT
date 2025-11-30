@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infinite Sticky Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+      /* Minimal resets */
+      body { margin: 0; padding: 0; overflow: hidden; }
+      
+      /* Custom scrollbar for textarea (default) */
+      textarea::-webkit-scrollbar {
+        width: 4px;
+      }
+      textarea::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.1);
+        border-radius: 4px;
+      }
+
+      /* Light Theme Scrollbar (Extremely Subtle / Blended) */
+      .thin-scrollbar-light::-webkit-scrollbar {
+        width: 5px; /* Thinner */
+      }
+      .thin-scrollbar-light::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .thin-scrollbar-light::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.05); /* Very transparent black */
+        border-radius: 10px;
+        transition: background-color 0.3s;
+      }
+      .thin-scrollbar-light:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.15); /* Slightly visible on hover */
+      }
+
+      /* Dark Theme Scrollbar (Subtle) */
+      .thin-scrollbar-dark::-webkit-scrollbar {
+        width: 5px;
+      }
+      .thin-scrollbar-dark::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .thin-scrollbar-dark::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+      .thin-scrollbar-dark:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Utility for dot pattern background */
+      .bg-pattern-dots {
+        background-image: radial-gradient(rgba(120, 53, 15, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "uuid": "https://aistudiocdn.com/uuid@^13.0.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
