@@ -239,7 +239,11 @@ const App: React.FC = () => {
           </button>
 
           <TripMap location={focusedNote.location} />
-          <LeftSidePanel location={focusedNote.location} />
+          <LeftSidePanel 
+            location={focusedNote.location} 
+            startDate={focusedNote.startDate}
+            endDate={focusedNote.endDate}
+          />
         </>
       )}
 

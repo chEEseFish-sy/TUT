@@ -6,11 +6,13 @@ import { MessageCircle, Map as MapIcon } from 'lucide-react';
 
 interface LeftSidePanelProps {
   location: string;
+  startDate: number | null;
+  endDate: number | null;
 }
 
 type Tab = 'chat' | 'plan';
 
-export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ location }) => {
+export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ location, startDate, endDate }) => {
   const [activeTab, setActiveTab] = useState<Tab>('plan');
 
   return (
@@ -57,7 +59,7 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ location }) => {
       {/* Content Area - Rounded all corners */}
       <div className="flex-1 min-h-0 relative z-10 shadow-xl rounded-xl overflow-hidden">
         {activeTab === 'plan' ? (
-          <ItineraryPanel location={location} />
+          <ItineraryPanel location={location} startDate={startDate} endDate={endDate} />
         ) : (
           <AIChatPanel location={location} />
         )}

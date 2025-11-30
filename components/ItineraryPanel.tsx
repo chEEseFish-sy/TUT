@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   CloudSun, 
   ChevronLeft, 
@@ -15,9 +15,11 @@ import {
 
 interface ItineraryPanelProps {
   location: string;
+  startDate: number | null;
+  endDate: number | null;
 }
 
-// Mock Data Structure
+// Data Structure
 interface DayPlan {
   day: number;
   date: string;
@@ -37,44 +39,78 @@ interface DayPlan {
   }[];
 }
 
-const MOCK_DAYS: DayPlan[] = [
-  {
-    day: 1,
-    date: 'Oct 12',
-    weekday: 'Saturday',
-    weather: 'Sunny',
-    temp: '22°C',
-    summary: 'Arrival and Old Town exploration. Enjoying the local cuisine and sunset views.',
-    hotel: 'Grand Hotel Central',
-    events: [
-      { id: 'e1', time: '10:00 AM', title: 'Arrival at Airport', transportToNext: { type: 'car', duration: '45 min' } },
-      { id: 'e2', time: '12:00 PM', title: 'Check-in & Lunch', transportToNext: { type: 'walk', duration: '15 min' } },
-      { id: 'e3', time: '02:00 PM', title: 'Historic Market Tour', transportToNext: { type: 'walk', duration: '10 min' } },
-      { id: 'e4', time: '05:00 PM', title: 'Sunset at Cathedral' }
-    ]
-  },
-  {
-    day: 2,
-    date: 'Oct 13',
-    weekday: 'Sunday',
-    weather: 'Cloudy',
-    temp: '19°C',
-    summary: 'Museum day and river cruise. Visiting the famous art gallery in the morning.',
-    hotel: 'Grand Hotel Central',
-    events: [
-      { id: 'e5', time: '09:00 AM', title: 'Modern Art Museum', transportToNext: { type: 'bus', duration: '20 min' } },
-      { id: 'e6', time: '01:00 PM', title: 'Riverside Lunch', transportToNext: { type: 'walk', duration: '5 min' } },
-      { id: 'e7', time: '03:00 PM', title: 'Boat Tour' }
-    ]
-  }
+// Sample templates to populate empty days so UI looks good
+const TEMPLATE_EVENTS = [
+  { time: '10:00 AM', title: 'City Walking Tour', transportToNext: { type: 'walk' as const, duration: '20 min' } },
+  { time: '01:00 PM', title: 'Local Cuisine Lunch', transportToNext: { type: 'car' as const, duration: '15 min' } },
+  { time: '03:00 PM', title: 'Museum Visit' },
+  { time: '07:00 PM', title: 'Dinner at Panorama' }
 ];
 
-export const ItineraryPanel: React.FC<ItineraryPanelProps> = ({ location }) => {
+export const ItineraryPanel: React.FC<ItineraryPanelProps> = ({ location, startDate, endDate }) => {
   const [currentDayIdx, setCurrentDayIdx] = useState(0);
-  const day = MOCK_DAYS[currentDayIdx];
+
+  // Dynamically generate the itinerary days
+  const dayPlans = useMemo(() => {
+    const days: DayPlan[] = [];
+    
+    // Default to today if no start date, or ensure sensible defaults
+    const start = startDate ? new Date(startDate) : new Date();
+    // Default to 3 days length if no end date
+    const end = endDate ? new Date(endDate) : new Date(start.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+    // Ensure we process correctly even if dates are inverted
+    const startTs = Math.min(start.getTime(), end.getTime());
+    const endTs = Math.max(start.getTime(), end.getTime());
+    
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    let currentTs = startTs;
+    let dayCount = 1;
+
+    // Loop through days
+    while (currentTs <= endTs) {
+      const dateObj = new Date(currentTs);
+      const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const weekdayStr = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+
+      days.push({
+        day: dayCount,
+        date: dateStr,
+        weekday: weekdayStr,
+        weather: ['Sunny', 'Cloudy', 'Partly Cloudy', 'Clear'][dayCount % 4], // Mock rotation
+        temp: `${20 + (dayCount % 5)}°C`, // Mock temp
+        summary: `Day ${dayCount} in ${location || 'Paradise'}. Exploring key landmarks and enjoying the atmosphere.`,
+        hotel: 'Grand Hotel Central',
+        // Cycle through mock events just so every day has content
+        events: TEMPLATE_EVENTS.map((ev, i) => ({
+          ...ev, 
+          id: `d${dayCount}-e${i}`,
+          // Vary the title slightly just to show difference
+          title: dayCount === 1 && i === 0 ? 'Arrival at Airport' : ev.title
+        }))
+      });
+
+      currentTs += oneDayMs;
+      dayCount++;
+      
+      // Safety break for very long ranges
+      if (dayCount > 30) break;
+    }
+
+    return days;
+  }, [startDate, endDate, location]);
+
+  // Reset index if out of bounds (e.g. date range shrank)
+  useEffect(() => {
+    if (currentDayIdx >= dayPlans.length) {
+      setCurrentDayIdx(0);
+    }
+  }, [dayPlans.length, currentDayIdx]);
+
+  const day = dayPlans[currentDayIdx] || dayPlans[0];
 
   const handleNext = () => {
-    if (currentDayIdx < MOCK_DAYS.length - 1) setCurrentDayIdx(prev => prev + 1);
+    if (currentDayIdx < dayPlans.length - 1) setCurrentDayIdx(prev => prev + 1);
   };
 
   const handlePrev = () => {
@@ -90,6 +126,8 @@ export const ItineraryPanel: React.FC<ItineraryPanelProps> = ({ location }) => {
       default: return <Car size={14} />;
     }
   };
+
+  if (!day) return <div className="p-4 text-center font-['Caveat'] text-2xl">Select dates to plan trip</div>;
 
   return (
     <div className="w-full h-full flex flex-col bg-[#fffbeb] overflow-hidden border-x border-b border-amber-200 text-gray-800">
@@ -116,7 +154,7 @@ export const ItineraryPanel: React.FC<ItineraryPanelProps> = ({ location }) => {
 
         <button 
           onClick={handleNext} 
-          disabled={currentDayIdx === MOCK_DAYS.length - 1}
+          disabled={currentDayIdx === dayPlans.length - 1}
           className="p-1 rounded-full hover:bg-amber-200 disabled:opacity-30 transition-colors"
         >
           <ChevronRight size={20} className="text-amber-800" />
