@@ -9,7 +9,7 @@ import { TripMap } from './components/TripMap';
 import { LeftSidePanel } from './components/LeftSidePanel';
 import { Note, NOTE_COLORS, NOTE_SIZE } from './types';
 import { LIGHT_BOARD_COLORS, DARK_BOARD_COLORS, HIGHLIGHTER_COLORS } from './constants';
-import { ChevronLeft, Moon, Sun } from 'lucide-react';
+import { ChevronLeft, Moon, Sun, User } from 'lucide-react';
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -40,31 +40,6 @@ const App: React.FC = () => {
   // Night: Dark BG
   // Note colors stay the same (Light paper style)
   const [isNightMode, setIsNightMode] = useState(false);
-
-  useEffect(() => {
-    const screenCenter = {
-      x: window.innerWidth / 2 - NOTE_SIZE / 2,
-      y: window.innerHeight / 2 - NOTE_SIZE / 2,
-    };
-    
-    const now = Date.now();
-    const threeDaysLater = now + (3 * 24 * 60 * 60 * 1000);
-
-    // Initial Note - Use the first standard color
-    const initialColor = NOTE_COLORS[0];
-
-    addNote({
-      x: screenCenter.x,
-      y: screenCenter.y,
-      location: "Paris, France",
-      startDate: now,
-      endDate: threeDaysLater,
-      text: "Welcome!\n1. Hover note & click Map icon to plan.\n2. Click dates to edit.\n3. Drag to trash to delete.",
-      color: initialColor,
-      rotation: -2
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const addNote = (overrides?: Partial<Note> & { x?: number, y?: number }) => {
     const startX = overrides?.x ?? 200;
@@ -180,28 +155,76 @@ const App: React.FC = () => {
         />
       )}
 
+      {/* User Button */}
+      {/* Interface 1: 左上角 */}
+      {/* Interface 2: 左侧区域最右端（不包含地图） */}
+      <button
+        onClick={() => {
+          // 用户按钮点击事件，可以后续添加功能
+          console.log('User button clicked');
+        }}
+        className={`fixed top-6 z-[100000] bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-gray-200 hover:bg-white hover:scale-110 group ${
+          focusedNoteId ? "left-[calc(25vw-68px)]" : "left-6"
+        }`}
+        style={{
+          transition: 'background-color 0.2s, transform 0.2s'
+        }}
+        title="User Profile"
+      >
+        <User size={20} className="text-gray-600 group-hover:text-gray-900 transition-colors" />
+      </button>
+
       {/* Day/Night Toggle Button */}
       {/* Interface 1: Top Right (right-6) */}
-      {/* Interface 2: Left side next to Back button */}
-      <button
-        onClick={toggleThemeMode}
-        className={`fixed top-6 z-[100000] bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-gray-200 hover:bg-white transition-all hover:scale-110 group ${
-          focusedNoteId ? "left-[120px]" : "right-6" // 120px is approx width of Back button + spacing
-        }`}
-        title={isNightMode ? "Switch to Day Mode" : "Switch to Night Mode"}
-      >
-        {isNightMode ? (
-          <Sun size={20} className="text-amber-500 group-hover:rotate-90 transition-transform" />
-        ) : (
-          <Moon size={20} className="text-indigo-600 group-hover:-rotate-12 transition-transform" />
-        )}
-      </button>
+      {/* Interface 2: 隐藏 */}
+      {!focusedNoteId && (
+        <button
+          onClick={toggleThemeMode}
+          className="fixed top-6 right-6 z-[100000] bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg border border-gray-200 hover:bg-white transition-all hover:scale-110 group"
+          title={isNightMode ? "Switch to Day Mode" : "Switch to Night Mode"}
+        >
+          {isNightMode ? (
+            <Sun size={20} className="text-amber-500 group-hover:rotate-90 transition-transform" />
+          ) : (
+            <Moon size={20} className="text-indigo-600 group-hover:-rotate-12 transition-transform" />
+          )}
+        </button>
+      )}
 
       {/* --- Main Board Components (Hidden when focused) --- */}
       <div className={`transition-opacity duration-500 ${focusedNoteId ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <Dispenser onTakeNote={handleDispenserClick} />
         <TrashCan isHovered={isTrashHovered} />
       </div>
+
+      {/* Welcome Hint - 高级简约提示词 */}
+      {notes.length === 0 && !focusedNoteId && (
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[1]">
+          <div 
+            className="animate-in fade-in duration-1000"
+          >
+            <div 
+              className="animate-bounce whitespace-nowrap text-center"
+              style={{
+                opacity: 0.5,
+                color: isNightMode ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.5)',
+                fontSize: '2.125rem',
+                fontWeight: 400,
+                letterSpacing: '0.15em',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+                textShadow: isNightMode 
+                  ? '0 1px 3px rgba(0, 0, 0, 0.4)' 
+                  : '0 1px 2px rgba(255, 255, 255, 0.9)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Start your journey TuT.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- Notes Layer --- */}
       {notes.map((note) => {
@@ -238,7 +261,10 @@ const App: React.FC = () => {
             Back
           </button>
 
-          <TripMap location={focusedNote.location} />
+          <TripMap 
+            location={focusedNote.location} 
+            center={focusedNote.geoLocation || undefined}
+          />
           <LeftSidePanel 
             location={focusedNote.location} 
             startDate={focusedNote.startDate}

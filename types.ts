@@ -4,10 +4,16 @@ export interface Position {
   y: number;
 }
 
+export interface GeoLocation {
+  lng: number; // 经度
+  lat: number; // 纬度
+}
+
 export interface Note {
   id: string;
   text: string; // Used for remarks now
   location: string;
+  geoLocation?: GeoLocation; // 可选的地理坐标（通过MCP获取）
   startDate: number | null; // Timestamp
   endDate: number | null; // Timestamp
   highlighterColor: string;
