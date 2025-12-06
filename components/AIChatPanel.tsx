@@ -14,7 +14,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({ location }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [messages, setMessages] = useState<AIMessage[]>([
-    { id: '1', role: 'ai', text: `Hi! I see you're planning a trip to ${location || 'somewhere new'}. How can I help you plan your itinerary?` }
+    { id: '1', role: 'ai', text: `Hi! Nice to meet you. I am TuT. , your personalized travel assistant. I see you're planning a trip to ${location || 'somewhere new'}. How can I help you plan your itinerary?` }
   ]);
 
   // Auto-scroll to bottom when messages change
@@ -62,7 +62,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({ location }) => {
       {/* Header text inside panel is removed/simplified since we have the tab now, or we keep a minimal greeting */}
       <div className="flex items-center gap-2 border-b border-gray-700/50 pb-2 mb-2 shrink-0 opacity-80">
         <Bot className="text-green-400" size={16} />
-        <span className="font-['Caveat'] text-lg text-gray-300">Travel Assistant (Powered by Doubao)</span>
+        <span className="font-['Caveat'] text-lg text-gray-300">TuT.</span>
       </div>
 
       {/* Messages */}
